@@ -1,5 +1,5 @@
 {
-    "python-envs.defaultEnvManager": "ms-python.python:conda",
+    "python-envs.defaultEnvManager": "ms-python.python:venv",
     "python-envs.pythonProjects": [],
     "editor.formatOnSave": true,
     "editor.smoothScrolling": true,
@@ -23,9 +23,9 @@
             "source": "PowerShell",
             "icon": "terminal-powershell",
             "args": [
-                // "-NoExit",
-                // "-Command",
-                // ". '${workspaceFolder}\\.venv\\Scripts\\Activate.ps1'"
+                "-NoExit",
+                "-Command",
+                ". '${workspaceFolder}\\.venv\\Scripts\\Activate.ps1'"
             ]
         }
     },
@@ -46,7 +46,7 @@
     "ruff.path": [
         "${workspaceFolder}/.venv/Scripts/ruff.exe"
     ],
-    "python-envs.defaultPackageManager": "ms-python.python:conda",
+    "python-envs.defaultPackageManager": "ms-python.python:pip",
     // "filewatcher.commands": [
     //     {
     //         "match": "\\.ui*",
