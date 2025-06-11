@@ -15,7 +15,7 @@ from PySide6.QtWidgets import QApplication, QSystemTrayIcon, QWidget
 from qfluentwidgets import Action, FluentIcon, RoundMenu
 
 from subtitle_ui import Ui_Form
-from translator import AliyunTranslator, MTranslator, NLLPTranslator
+from translator import MTranslator
 
 CURRENT_DIR = Path(__file__).parent.resolve()
 
