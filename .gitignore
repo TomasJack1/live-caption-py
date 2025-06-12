@@ -11,3 +11,4 @@ __pycache__
 download/*
 video.db
 models/*
+tests

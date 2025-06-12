@@ -1,4 +1,5 @@
 import asyncio
+import functools
 import subprocess
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -18,6 +19,27 @@ from subtitle_ui import Ui_Form
 from translator import MTranslator
 
 CURRENT_DIR = Path(__file__).parent.resolve()
+
+
+def rate_limit(func):
+    last_time = None
+
+    @functools.wraps(func)
+    def wrapper(*args, **kwargs):
+        nonlocal last_time
+
+        if last_time is None:
+            last_time = time.time()
+        with open("test.txt", "a+") as file:
+            file.write(str(time.time() - last_time) + "\r")
+
+        if time.time() - last_time > 1.75:
+            last_time = time.time()
+            return
+
+        last_time = time.time()
+
+    return wrapper
 
 
 class SubtitleMainWindow(QWidget, Ui_Form):
@@ -44,8 +66,9 @@ class SubtitleMainWindow(QWidget, Ui_Form):
 
         # 用于字幕更新
         self.last_text = ""
-        self.interval = 10
+        self.interval = 5
         self.count = 1
+        self.last_time = None
 
         self.executor = ThreadPoolExecutor(max_workers=8)
 
@@ -74,15 +97,16 @@ class SubtitleMainWindow(QWidget, Ui_Form):
 
     async def updateSubtitle(self, text):
         """更新字幕界面 槽函数"""
+        if self.last_time is None:
+            self.last_time = time.time()
+
         text = text.replace("\n", "")
         if text == "":
             return
 
-        if text.startswith(self.last_text) and len(self.last_text) <= self.interval * self.count:
+        if text.startswith(self.last_text) and len(self.last_text) <= self.interval * self.count and time.time() - self.last_time > 2:
             self.last_text = text
             return
-
-        print(self.last_text, self.count)
 
         if len(self.last_text) > self.interval * self.count:
             self.count += 1
@@ -102,7 +126,13 @@ class SubtitleMainWindow(QWidget, Ui_Form):
         self.last_text = text
 
         result = await translation_task
-        self.plainTextEdit.setText(result)
+
+        self.updatePlainTextEdit(result)
+        self.last_time = time.time()
+
+    @rate_limit
+    def updatePlainTextEdit(self, text):
+        self.plainTextEdit.setText(text)
 
     def paintEvent(self, event) -> None:
         """绘制关键步骤：透明背景+两个图形"""
@@ -184,7 +214,7 @@ class LiveCaptionManagerThread(QThread):
         start_time = None
 
         while True:
-            time.sleep(0.02)
+            time.sleep(0.01)
             text = self.text
             length = len(text)
 
@@ -206,11 +236,11 @@ class LiveCaptionManagerThread(QThread):
                 # LiveCaptions.exe字幕没有更新 则进行下一轮
                 if cur_index >= length:
                     last_index = length
-                    # time.sleep(0.1)
                     break
 
                 # 如果是。或、则这一轮停止并更新界面，不是则累加
-                if text[cur_index] != "。" and text[cur_index] != "、" and text[cur_index] != " ":
+                if text[cur_index] != "。" and text[cur_index] != " " and text[cur_index] != "、":
+                    # and text[cur_index] != "、"
                     subtitle += text[cur_index]
                     cur_index += 1
                 else:
@@ -221,7 +251,7 @@ class LiveCaptionManagerThread(QThread):
                     break
 
                 # 每隔0.1s如果语句还没结束（没遇到。、）则更新部分语句到界面
-                if time.time() - start_time > 0.1:
+                if time.time() - start_time > 0.05:
                     self.emit(subtitle)
                     start_time = time.time()
                     continue
