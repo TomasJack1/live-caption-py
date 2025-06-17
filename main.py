@@ -16,30 +16,9 @@ from PySide6.QtWidgets import QApplication, QSystemTrayIcon, QWidget
 from qfluentwidgets import Action, FluentIcon, RoundMenu
 
 from subtitle_ui import Ui_Form
-from translator import MTranslator
+from translator import BergamotTranslator
 
 CURRENT_DIR = Path(__file__).parent.resolve()
-
-
-def rate_limit(func):
-    last_time = None
-
-    @functools.wraps(func)
-    def wrapper(*args, **kwargs):
-        nonlocal last_time
-
-        if last_time is None:
-            last_time = time.time()
-        with open("test.txt", "a+") as file:
-            file.write(str(time.time() - last_time) + "\r")
-
-        if time.time() - last_time > 1.75:
-            last_time = time.time()
-            return
-
-        last_time = time.time()
-
-    return wrapper
 
 
 class SubtitleMainWindow(QWidget, Ui_Form):
@@ -69,7 +48,6 @@ class SubtitleMainWindow(QWidget, Ui_Form):
         self.interval = 5
         self.count = 1
         self.last_time = None
-
         self.executor = ThreadPoolExecutor(max_workers=8)
 
         # 加载环境变量
@@ -86,8 +64,8 @@ class SubtitleMainWindow(QWidget, Ui_Form):
             [
                 Action(FluentIcon.HIDE, "隐藏", triggered=self.hide),
                 Action(FluentIcon.VIEW, "打开", triggered=self.show),
-                Action(FluentIcon.PIN, "置顶", triggered=lambda _: self.setWindowFlags(Qt.WindowType.Window)),
                 Action(FluentIcon.HOME_FILL, "Live Captions", triggered=self.live_caption_manager_thread.switch_live_caption_window),
+                Action(FluentIcon.CLOSE, "关闭", triggered=self.close),
             ],
         )
 
@@ -100,12 +78,12 @@ class SubtitleMainWindow(QWidget, Ui_Form):
         if self.last_time is None:
             self.last_time = time.time()
 
-        text = text.replace("\n", "")
-        if text == "":
-            return
-
         if text.startswith(self.last_text) and len(self.last_text) <= self.interval * self.count and time.time() - self.last_time > 2:
             self.last_text = text
+            return
+
+        text = text.replace("\n", "")
+        if text == "":
             return
 
         if len(self.last_text) > self.interval * self.count:
@@ -118,7 +96,7 @@ class SubtitleMainWindow(QWidget, Ui_Form):
         translation_task = asyncio.ensure_future(
             loop.run_in_executor(
                 self.executor,
-                lambda text: MTranslator.translate(text),
+                lambda text: BergamotTranslator.translate(text),
                 self.last_text,
             ),
         )
@@ -127,12 +105,8 @@ class SubtitleMainWindow(QWidget, Ui_Form):
 
         result = await translation_task
 
-        self.updatePlainTextEdit(result)
+        self.plainTextEdit.setText(result)
         self.last_time = time.time()
-
-    @rate_limit
-    def updatePlainTextEdit(self, text):
-        self.plainTextEdit.setText(text)
 
     def paintEvent(self, event) -> None:
         """绘制关键步骤：透明背景+两个图形"""
@@ -164,7 +138,7 @@ class SubtitleMainWindow(QWidget, Ui_Form):
 
 
 class LiveCaptionManagerThread(QThread):
-    """LiveCaptions.exe 管理线程(获取字幕、翻译字幕、更新字幕)"""
+    """LiveCaptions.exe 管理线程(获取字幕)"""
 
     signal = Signal(str)
 

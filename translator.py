@@ -1,20 +1,15 @@
 import httpx
 
 
-class MTranslator:
+class BergamotTranslator:
     client = httpx.Client()
 
     @classmethod
-    def translate(cls, text, src="ja", tgt="zh"):
+    def translate(cls, text):
         response = cls.client.post(
-            url="http://localhost:8989/translate",
+            url="http://localhost:8080/translate",
             json={
-                "from": src,
-                "to": tgt,
                 "text": text,
-            },
-            headers={
-                "Authorization": "",
             },
         )
 
