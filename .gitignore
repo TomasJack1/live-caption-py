@@ -12,3 +12,4 @@ download/*
 video.db
 models/*
 tests
+dist

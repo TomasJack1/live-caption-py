@@ -1,5 +1,4 @@
 import asyncio
-import functools
 import subprocess
 import time
 from concurrent.futures import ThreadPoolExecutor
@@ -47,7 +46,6 @@ class SubtitleMainWindow(QWidget, Ui_Form):
         self.last_text = ""
         self.interval = 5
         self.count = 1
-        self.last_time = None
         self.executor = ThreadPoolExecutor(max_workers=8)
 
         # 加载环境变量
@@ -75,10 +73,7 @@ class SubtitleMainWindow(QWidget, Ui_Form):
 
     async def updateSubtitle(self, text):
         """更新字幕界面 槽函数"""
-        if self.last_time is None:
-            self.last_time = time.time()
-
-        if text.startswith(self.last_text) and len(self.last_text) <= self.interval * self.count and time.time() - self.last_time > 2:
+        if text.startswith(self.last_text) and len(self.last_text) <= self.interval * self.count:
             self.last_text = text
             return
 
@@ -86,7 +81,7 @@ class SubtitleMainWindow(QWidget, Ui_Form):
         if text == "":
             return
 
-        if len(self.last_text) > self.interval * self.count:
+        if text.startswith(self.last_text) and len(text) > self.interval * self.count:
             self.count += 1
 
         if not text.startswith(self.last_text):
@@ -106,7 +101,6 @@ class SubtitleMainWindow(QWidget, Ui_Form):
         result = await translation_task
 
         self.plainTextEdit.setText(result)
-        self.last_time = time.time()
 
     def paintEvent(self, event) -> None:
         """绘制关键步骤：透明背景+两个图形"""
