@@ -39,7 +39,7 @@
     "terminal.integrated.env.linux": {
         "PYTHONPATH": "${workspaceFolder}"
     },
-    "explorer.excludeGitIgnore": true,
+    "explorer.excludeGitIgnore": false,
     // "python.analysis.inlayHints.callArgumentNames": true,
     // "python.analysis.inlayHints.variableTypes": true,
     // "python.analysis.inlayHints.functionReturnTypes": true,
