@@ -3,7 +3,7 @@ name: Nuitka Build and Release
 on:
   push:
     tags:
-      - 'v*'
+      - 'v*.*.*'
 
 jobs:
 
