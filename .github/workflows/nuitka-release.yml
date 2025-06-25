@@ -40,4 +40,4 @@ jobs:
           uses: softprops/action-gh-release@v2
           if: startsWith(github.ref, 'refs/tags/')
           with:
-            files: build\main.dist\live-caption-py.exe 
+            files: build/main.dist/live-caption-py.exe 
