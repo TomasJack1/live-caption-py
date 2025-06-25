@@ -23,7 +23,7 @@ jobs:
         - name: Install Python Requirements
           run: |
             pip install --no-cache-dir --upgrade -r requirements.txt
-            pip install Nuitka
+            pip install Nuitka imageio
 
         - name: Build with Nuitka
           run: |
