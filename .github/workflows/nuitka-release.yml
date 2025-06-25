@@ -34,7 +34,7 @@ jobs:
               --show-memory `
               --include-package=comtypes `
               --include-module=comtypes.stream `
-              --windows-icon-from-ico=./app-icon.png
+              --windows-icon-from-ico=./app-icon.png `
               --enable-plugin=pyside6 `
               --output-dir=build `
               main.py
