@@ -27,16 +27,16 @@ jobs:
 
         - name: Build with Nuitka
           run: |
-            python -m nuitka \
-              --windows-console-mode=disable \
-              --standalone \
-              --show-progress \
-              --show-memory \
-              --include-package=comtypes \
-              --include-module=comtypes.stream \
+            python -m nuitka `
+              --windows-console-mode=disable `
+              --standalone `
+              --show-progress `
+              --show-memory `
+              --include-package=comtypes `
+              --include-module=comtypes.stream `
               --windows-icon-from-ico=./app-icon.png
-              --enable-plugin=pyside6 \
-              --output-dir=build \
+              --enable-plugin=pyside6 `
+              --output-dir=build `
               main.py
         
         # - name: Nuitka Build
