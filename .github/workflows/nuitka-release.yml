@@ -1,0 +1,40 @@
+name: Nuitka Build and Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+
+  build:
+    runs-on: windows-latest
+
+    steps:
+        # Check-out repository
+        - name: Checkout
+          uses: actions/checkout@v4
+        
+        # Setup Python
+        - name: Setup Python
+          uses: actions/setup-python@v5
+          with:
+            python-version: '3.12' # Version range or exact version of a Python version to use, using SemVer's version range syntax
+            architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
+
+        - name: Nuitka Build
+          uses: Nuitka/Nuitka-Action@main
+          with:
+            nuitka-version: main
+            script-name: main.py
+            mode: standalone
+            enable-plugins: pyside6
+        - name: Rename Exe
+          run: move build/main.exe build/live-caption-py.exe 
+
+
+        - name: Upload # 上传
+          uses: softprops/action-gh-release@v2 # 使用第三方actions 上传
+          if: startsWith(github.ref, 'refs/tags/') # 仅在tag时上传
+          with:
+            files: build/live-caption-py.exe  # 上传的文件
