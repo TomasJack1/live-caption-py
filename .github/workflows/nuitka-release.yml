@@ -11,18 +11,16 @@ jobs:
     runs-on: windows-latest
 
     steps:
-        # Check-out repository
         - name: Checkout
           uses: actions/checkout@v4
         
-        # Setup Python
         - name: Setup Python
           uses: actions/setup-python@v5
           with:
-            python-version: '3.12' # Version range or exact version of a Python version to use, using SemVer's version range syntax
-            architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
+            python-version: '3.12' 
+            architecture: 'x64' 
         
-        - name: Rename EXE
+        - name: Install Python Requirements
           run: pip install --no-cache-dir --upgrade -r requirements.txt
 
         
@@ -35,11 +33,11 @@ jobs:
             enable-plugins: pyside6
 
         - name: Rename EXE
-          run: move build/main.exe build/live-caption-py.exe 
+          run: move build\main.dist\main.exe build\main.dist\live-caption-py.exe 
 
 
-        - name: Upload # 上传
-          uses: softprops/action-gh-release@v2 # 使用第三方actions 上传
-          if: startsWith(github.ref, 'refs/tags/') # 仅在tag时上传
+        - name: Upload
+          uses: softprops/action-gh-release@v2
+          if: startsWith(github.ref, 'refs/tags/')
           with:
-            files: build/live-caption-py.exe  # 上传的文件
+            files: build\main.dist\live-caption-py.exe 

@@ -1,0 +1,69 @@
+# 🎧 实时字幕翻译工具 📝
+
+![实时字幕翻译](https://img.shields.io/badge/实时-字幕翻译-brightgreen?style=flat-square) 
+![Python](https://img.shields.io/badge/Python-3.8+-blue?logo=python&style=flat-square)
+![PySide6](https://img.shields.io/badge/PySide6-6.4+-blue?logo=qt&style=flat-square)
+
+**让你的视频会议、在线课程和媒体播放体验更加无障碍！**  
+这个项目是一个基于Python的**实时字幕工具**，能够捕获系统音频生成的字幕并进行**实时翻译显示**！
+
+## ✨ 核心功能
+
+- **🎤 实时字幕捕获**：通过Windows Live Captions获取系统音频生成的字幕
+- **🌍 多语言翻译**：将捕获的字幕实时翻译为目标语言
+- **🪟 悬浮窗口**：半透明可拖拽的悬浮字幕窗口
+- **📌 系统托盘支持**：最小化到系统托盘操作
+- **👁️ 窗口管理**：一键切换Live Captions窗口的显示/隐藏
+- **🚀 高性能**：异步处理确保翻译流畅不卡顿
+
+## 🚀 快速开始
+
+### 1️⃣ 运行
+  - 确保系统中已安装并启用Live Captions功能
+  - 确保已经部署[bergamot-translation-server](https://github.com/TomasJack1/bergamot-translation-server)
+### 3️⃣ 启动应用
+从Release下载应用
+
+## 🖥️ 操作指南
+
+| 功能                  | 操作方式                         | 效果                           |
+| --------------------- | -------------------------------- | ------------------------------ |
+| **移动窗口**          | 🖱️ 点击并拖拽字幕窗口             | 将窗口定位到屏幕任意位置       |
+| **显示/隐藏主窗口**   | 📌 系统托盘右键菜单→显示/隐藏     | 控制主窗口可见性               |
+| **切换Live Captions** | 📌 系统托盘右键菜单→Live Captions | 控制Live Captions窗口显示/隐藏 |
+| **退出应用**          | 📌 系统托盘右键菜单→关闭          | 完全退出应用程序               |
+
+## 📁 项目结构
+
+```
+实时字幕翻译工具/
+├── 📄 main.py                # 主程序入口
+├── 📄 subtitle_ui.py         # 字幕界面UI定义
+├── 📄 bergamot_translator.py # 翻译服务客户端
+├── 🖼️ app-icon.png           # 应用图标
+├── 🔧 .env                   # 环境变量配置文件
+└── 📖 README.md              # 项目说明文档
+```
+
+## ⚙️ 技术栈
+
+- **PySide6**：构建现代化GUI界面
+- **uiautomation**：自动化控制Windows应用
+- **win32gui**：Windows窗口管理
+- **asyncio**：异步任务处理
+- **ThreadPoolExecutor**：多线程翻译处理
+- **HTTPX**：翻译API通信
+
+
+## 🛠️ 自定义配置
+
+
+
+## 📜 许可证
+
+本项目采用[MIT许可证](LICENSE)。详情请参阅项目中的LICENSE文件。
+
+---
+
+**🎉 让语言不再成为障碍，享受无障碍的音频体验！**  
+**🌟 欢迎贡献代码和提出改进建议！**
