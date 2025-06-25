@@ -21,7 +21,11 @@ jobs:
           with:
             python-version: '3.12' # Version range or exact version of a Python version to use, using SemVer's version range syntax
             architecture: 'x64' # optional x64 or x86. Defaults to x64 if not specified
+        
+        - name: Rename EXE
+          run: pip install --no-cache-dir --upgrade -r requirements.txt
 
+        
         - name: Nuitka Build
           uses: Nuitka/Nuitka-Action@main
           with:
@@ -29,7 +33,8 @@ jobs:
             script-name: main.py
             mode: standalone
             enable-plugins: pyside6
-        - name: Rename Exe
+
+        - name: Rename EXE
           run: move build/main.exe build/live-caption-py.exe 
 
 
