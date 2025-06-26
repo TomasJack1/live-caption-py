@@ -32,7 +32,6 @@ jobs:
               --standalone `
               --show-progress `
               --show-memory `
-              --disable-implicit-imports `
               --include-package=comtypes `
               --include-module=comtypes.stream `
               --windows-icon-from-ico=./app-icon.png `
