@@ -29,7 +29,7 @@ jobs:
           run: |
             python -m nuitka `
               --windows-console-mode=disable `
-              --standalone `
+              --onefile `
               --show-progress `
               --show-memory `
               --assume-yes-for-downloads `
@@ -49,11 +49,11 @@ jobs:
         #     enable-plugins: pyside6
 
         - name: Rename EXE
-          run: move build\main.dist\main.exe build\main.dist\live-caption-py.exe 
+          run: move build\main.exe build\live-caption-py.exe 
 
 
         - name: Upload
           uses: softprops/action-gh-release@v2
           if: startsWith(github.ref, 'refs/tags/')
           with:
-            files: build/main.dist/live-caption-py.exe 
+            files: build/live-caption-py.exe 

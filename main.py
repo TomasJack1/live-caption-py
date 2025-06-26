@@ -47,6 +47,7 @@ class SubtitleMainWindow(QWidget, Ui_Form):
         self.interval = 5
         self.count = 1
         self.executor = ThreadPoolExecutor(max_workers=8)
+        self.last_time = time.time()
 
         # 加载环境变量
         load_dotenv(dotenv_path=CURRENT_DIR / ".env", verbose=True)
@@ -100,7 +101,14 @@ class SubtitleMainWindow(QWidget, Ui_Form):
 
         result = await translation_task
 
-        self.plainTextEdit.setText(result)
+        # 如果句子太长，则截断显示在界面上
+        if len(result) > 50:
+            result = result[len(result) - 50 :]
+
+        # 控制界面刷新的频率
+        if self.last_time is not None and time.time() - self.last_time > 0.5:
+            self.last_time = time.time()
+            self.plainTextEdit.setText(result)
 
     def paintEvent(self, event) -> None:
         """绘制关键步骤：透明背景+两个图形"""
