@@ -7,13 +7,13 @@ from pathlib import Path
 import uiautomation as auto
 import win32con
 import win32gui
-from dotenv import load_dotenv
 from PySide6 import QtAsyncio
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtGui import QColor, QIcon, QPainter, QPainterPath
 from PySide6.QtWidgets import QApplication, QSystemTrayIcon, QWidget
 from qfluentwidgets import Action, FluentIcon, RoundMenu
 
+import subtitle_rc  # noqa: F401
 from subtitle_ui import Ui_Form
 from translator import BergamotTranslator
 
@@ -34,6 +34,9 @@ class SubtitleMainWindow(QWidget, Ui_Form):
         self.global_path.addRect(self.drag_widget.rect())
         self.drag_start_pos = None
 
+        # 设置所有文本为红色
+        self.plainTextEdit.setStyleSheet("color: red;")
+
         # 开一个线程用来更新字幕
         self.live_caption_manager_thread = LiveCaptionManagerThread()
         self.live_caption_manager_thread.signal.connect(lambda text: asyncio.ensure_future(self.updateSubtitle(text)))
@@ -42,6 +45,9 @@ class SubtitleMainWindow(QWidget, Ui_Form):
         # 创建系统托盘
         self.create_tray_menu()
 
+        # 设置图标
+        self.setWindowIcon(QIcon(":/icons/app-icon.png"))
+
         # 用于字幕更新
         self.last_text = ""
         self.interval = 5
@@ -49,13 +55,10 @@ class SubtitleMainWindow(QWidget, Ui_Form):
         self.executor = ThreadPoolExecutor(max_workers=8)
         self.last_time = time.time()
 
-        # 加载环境变量
-        load_dotenv(dotenv_path=CURRENT_DIR / ".env", verbose=True)
-
     def create_tray_menu(self) -> None:
         """创建系统托盘UI"""
         self.trayicon = QSystemTrayIcon(self)
-        self.trayicon.setIcon(QIcon("./app-icon.png"))
+        self.trayicon.setIcon(QIcon(":/icons/app-icon.png"))
 
         # 创建托盘的右键菜单
         self.traymenu = RoundMenu()
