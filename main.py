@@ -14,6 +14,7 @@ from PySide6.QtWidgets import QApplication, QSystemTrayIcon, QWidget
 from qfluentwidgets import Action, FluentIcon, RoundMenu
 
 import subtitle_rc  # noqa: F401
+from settings import get_settings
 from subtitle_ui import Ui_Form
 from translator import BergamotTranslator
 
@@ -23,6 +24,9 @@ CURRENT_DIR = Path(__file__).parent.resolve()
 class SubtitleMainWindow(QWidget, Ui_Form):
     def __init__(self) -> None:
         super().__init__()
+
+        # 初始化设置
+        self.settings = get_settings()
 
         self.setupUi(self)
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
@@ -298,6 +302,7 @@ class LiveCaptionManagerThread(QThread):
 
 def main() -> None:
     """程序主入口"""
+
     app = QApplication([])
     subtitle_main_window = SubtitleMainWindow()
 
