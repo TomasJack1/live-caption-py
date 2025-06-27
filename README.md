@@ -36,12 +36,6 @@
 └── 📖 README.md              # 项目说明文档
 ```
 
-## ⚙️ 技术栈
-
-- **PySide6**：构建现代化GUI界面
-- **Fastapi**：自动化控制Windows应用
-- **Pywin32**：Windows窗口管理
-
 ## 📜 许可证
 
 本项目采用[MIT许可证](LICENSE)。详情请参阅项目中的LICENSE文件。
