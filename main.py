@@ -1,9 +1,11 @@
 import asyncio
 import subprocess
+import threading
 import time
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
+import psutil
 import uiautomation as auto
 import win32con
 import win32gui
@@ -143,7 +145,8 @@ class SubtitleMainWindow(QWidget, Ui_Form):
             self.drag_start_pos = None
 
     def closeEvent(self, event) -> None:
-        self.live_caption_manager_thread.quit()
+        # 退出子线程
+        self.live_caption_manager_thread.stop()
 
 
 class LiveCaptionManagerThread(QThread):
@@ -171,6 +174,9 @@ class LiveCaptionManagerThread(QThread):
         self.visible = True
         self.switch_live_caption_window()
 
+        # 线程退出标志
+        self.stop_event = threading.Event()
+
         for wnd in self.live_caption_window.GetChildren():
             if wnd.ClassName == "Windows.UI.Composition.DesktopWindowContentBridge":
                 self.live_caption_text_control = wnd.GetFirstChildControl().TextControl()
@@ -179,6 +185,17 @@ class LiveCaptionManagerThread(QThread):
     def text(self) -> str:
         """获取LiveCaptions.exe 字幕"""
         return self.live_caption_text_control.Name
+
+    def stop(self) -> None:
+        """退出线程"""
+        # 退出LiveCaptions.exe
+        for proc in psutil.process_iter(["name", "pid"]):
+            if proc.info["name"] == "LiveCaptions.exe":
+                psutil.Process(proc.info["pid"]).kill()
+                break
+
+        # 设置退出标志
+        self.stop_event.set()
 
     def run(self) -> None:
         """线程主函数"""
@@ -197,6 +214,9 @@ class LiveCaptionManagerThread(QThread):
         start_time = None
 
         while True:
+            if self.stop_event.is_set():
+                return
+
             time.sleep(0.01)
             text = self.text
             length = len(text)
