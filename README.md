@@ -28,26 +28,19 @@
 ```
 实时字幕翻译工具/
 ├── 📄 main.py                # 主程序入口
-├── 📄 subtitle_ui.py         # 字幕界面UI定义
-├── 📄 bergamot_translator.py # 翻译服务客户端
+├── 📄 subtitle_ui.ui         # 字幕界面UI定义
+├── 📄 translator.py          # 翻译服务客户端
 ├── 🖼️ app-icon.png           # 应用图标
-├── 🔧 .env                   # 环境变量配置文件
+├── 🔧 ruff.toml              # python ruff格式化工具配置
+├── 📄 subtitle.qrc           # pyside6 资源文件定义
 └── 📖 README.md              # 项目说明文档
 ```
 
 ## ⚙️ 技术栈
 
 - **PySide6**：构建现代化GUI界面
-- **uiautomation**：自动化控制Windows应用
-- **win32gui**：Windows窗口管理
-- **asyncio**：异步任务处理
-- **ThreadPoolExecutor**：多线程翻译处理
-- **HTTPX**：翻译API通信
-
-
-## 🛠️ 自定义配置
-
-
+- **Fastapi**：自动化控制Windows应用
+- **Pywin32**：Windows窗口管理
 
 ## 📜 许可证
 
