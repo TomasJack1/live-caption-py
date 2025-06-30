@@ -18,7 +18,7 @@ from qfluentwidgets import Action, FluentIcon, RoundMenu
 import subtitle_rc  # noqa: F401
 from settings import get_settings
 from subtitle_ui import Ui_Form
-from translator import BergamotTranslator
+from translator import BergamotTranslator, DeeplTranslator
 
 CURRENT_DIR = Path(__file__).parent.resolve()
 
@@ -83,16 +83,17 @@ class SubtitleMainWindow(QWidget, Ui_Form):
 
     async def updateSubtitle(self, text):
         """更新字幕界面 槽函数"""
-        if text.startswith(self.last_text) and len(self.last_text) <= self.interval * self.count:
-            self.last_text = text
-            return
-
+        # """更新字幕界面 槽函数"""
         text = text.replace("\n", "")
         if text == "":
             return
 
-        if text.startswith(self.last_text) and len(text) > self.interval * self.count:
-            self.count += 1
+        if text.startswith(self.last_text) and len(self.last_text) <= self.interval * self.count:
+            self.last_text = text
+            return
+
+        if text.startswith(self.last_text) and len(self.last_text) > self.interval * self.count:
+            self.count *= 2
 
         if not text.startswith(self.last_text):
             self.count = 1
