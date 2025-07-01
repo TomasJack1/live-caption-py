@@ -2,13 +2,16 @@ import asyncio
 import subprocess
 import threading
 import time
+import winreg
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
 import psutil
 import uiautomation as auto
+import win32api
 import win32con
 import win32gui
+import win32security
 from PySide6 import QtAsyncio
 from PySide6.QtCore import Qt, QThread, Signal
 from PySide6.QtGui import QColor, QIcon, QPainter, QPainterPath
@@ -92,9 +95,8 @@ class SubtitleMainWindow(QWidget, Ui_Form):
         self.trayicon.setContextMenu(self.traymenu)
         self.trayicon.show()
 
-    async def updateSubtitle(self, text):
+    async def updateSubtitle(self, text) -> None:
         """更新字幕界面 槽函数"""
-        # """更新字幕界面 槽函数"""
         text = text.replace("\n", "")
         if text == "":
             return
@@ -113,7 +115,7 @@ class SubtitleMainWindow(QWidget, Ui_Form):
             result = await asyncio.ensure_future(
                 asyncio.get_running_loop().run_in_executor(
                     self.executor,
-                    lambda text: BergamotTranslator.translate(text),
+                    lambda text: BergamotTranslator.translate(text, self.live_caption_manager_thread.get_current_language()),
                     self.last_text,
                 ),
             )
@@ -137,7 +139,7 @@ class SubtitleMainWindow(QWidget, Ui_Form):
 
         painter.fillPath(self.global_path, QColor(0, 0, 0, 1))
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event) -> None:
         """记录拖拽起始位置"""
         if event.button() == Qt.LeftButton:
             # 获取相对窗口左上角的坐标
@@ -157,6 +159,7 @@ class SubtitleMainWindow(QWidget, Ui_Form):
             self.drag_start_pos = None
 
     def closeEvent(self, event) -> None:
+        """主线程退出时的操作"""
         # 退出子线程
         self.live_caption_manager_thread.stop()
 
@@ -248,13 +251,19 @@ class LiveCaptionManagerThread(QThread):
                 start_time = time.time()
 
             while True:
+                # 每隔0.1s如果语句还没结束（没遇到。、）则更新部分语句到界面
+                if time.time() - start_time > 0.05:
+                    self.emit(subtitle)
+                    start_time = time.time()
+                    continue
+
                 # LiveCaptions.exe字幕没有更新 则进行下一轮
                 if cur_index >= length:
                     last_index = length
                     break
 
                 # 如果是。或、则这一轮停止并更新界面，不是则累加
-                if text[cur_index] != "。" and text[cur_index] != " " and text[cur_index] != "、":
+                if text[cur_index] != "。" and text[cur_index] != "、" and text[cur_index] != ".":
                     # and text[cur_index] != "、"
                     subtitle += text[cur_index]
                     cur_index += 1
@@ -265,15 +274,30 @@ class LiveCaptionManagerThread(QThread):
                     subtitle = ""
                     break
 
-                # 每隔0.1s如果语句还没结束（没遇到。、）则更新部分语句到界面
-                if time.time() - start_time > 0.05:
-                    self.emit(subtitle)
-                    start_time = time.time()
-                    continue
+    def get_current_language(self) -> str:
+        """获取LiveCaptions.exe现在识别的语言
+
+        Returns:
+            str: 语言代码(ja, em, zh等)
+        """
+        # 获取用户sid
+        username = win32api.GetUserName()
+        domain = win32api.GetComputerName()
+        pysid = win32security.LookupAccountName(domain, username)[0]
+        sid = win32security.ConvertSidToStringSid(pysid)
+
+        # 获取现在LiveCaptions.exe识别的语言
+        with winreg.OpenKey(
+            winreg.HKEY_USERS,
+            f"{sid}\\Software\\Microsoft\\LiveCaptions\\UI",
+            0,
+            winreg.KEY_READ,
+        ) as key:
+            value, _ = winreg.QueryValueEx(key, "CaptionLanguage")
+            return value.lower()
 
     def emit(self, text) -> None:
         """字幕更新事件"""
-
         if text == "":
             return
 
@@ -288,6 +312,7 @@ class LiveCaptionManagerThread(QThread):
         )
 
     def switch_live_caption_window(self) -> None:
+        """改变LiveCaptions.exe窗口是否可见"""
         if self.visible is True:
             self.hide_live_caption_window()
             self.visible = False

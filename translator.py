@@ -9,11 +9,13 @@ class BergamotTranslator:
     settings = get_settings()
 
     @classmethod
-    def translate(cls, text) -> str:
+    def translate(cls, text: str, src: str = "ja", tgt: str = "zh") -> str:
         """调用后端翻译服务
 
         Args:
-            text (_type_): 翻译后的文本
+            text (str): 翻译后的文本
+            src (str): 源语言
+            tgt (str): 目标语言
 
         Returns:
             str: _description_
