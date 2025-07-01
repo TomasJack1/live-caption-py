@@ -1,5 +1,7 @@
 <RCC>
     <qresource prefix="/icons">
         <file>app-icon.png</file>
+        <file>checkbox-checked.png</file>
+        <file>checkbox-unchecked.png</file>
     </qresource>
 </RCC>

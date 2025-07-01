@@ -60,6 +60,7 @@ class SubtitleMainWindow(QWidget, Ui_Form):
         self.count = 1
         self.executor = ThreadPoolExecutor(max_workers=8)
         self.last_time = time.time()
+        self.enable_translation = True
 
     def create_tray_menu(self) -> None:
         """创建系统托盘UI"""
@@ -68,14 +69,24 @@ class SubtitleMainWindow(QWidget, Ui_Form):
 
         # 创建托盘的右键菜单
         self.traymenu = RoundMenu()
+
         self.traymenu.addActions(
             [
-                Action(FluentIcon.HIDE, "隐藏", triggered=self.hide),
-                Action(FluentIcon.VIEW, "打开", triggered=self.show),
+                Action(FluentIcon.VIEW, "隐藏", triggered=lambda: self.hide() if self.isVisible() is True else self.show()),
                 Action(FluentIcon.HOME_FILL, "Live Captions", triggered=self.live_caption_manager_thread.switch_live_caption_window),
-                Action(FluentIcon.CLOSE, "关闭", triggered=self.close),
+                Action(FluentIcon.CLOSE, "退出", triggered=self.close),
             ],
         )
+
+        # 翻译开关
+        checked_icon = QIcon(":/icons/checkbox-checked.png")
+        unchecked_icon = QIcon(":/icons/checkbox-unchecked.png")
+        checkbox_action = Action(checked_icon, "翻译")
+        checkbox_action.setCheckable(True)
+        checkbox_action.setChecked(True)
+        checkbox_action.triggered.connect(lambda checked: checkbox_action.setIcon(checked_icon) if checked is True else checkbox_action.setIcon(unchecked_icon))
+        checkbox_action.toggled.connect(lambda checked: setattr(self, "enable_translation", checked))
+        self.traymenu.addAction(checkbox_action)
 
         # 配置菜单并显示托盘
         self.trayicon.setContextMenu(self.traymenu)
@@ -98,18 +109,18 @@ class SubtitleMainWindow(QWidget, Ui_Form):
         if not text.startswith(self.last_text):
             self.count = 1
 
-        loop = asyncio.get_running_loop()
-        translation_task = asyncio.ensure_future(
-            loop.run_in_executor(
-                self.executor,
-                lambda text: BergamotTranslator.translate(text),
-                self.last_text,
-            ),
-        )
+        if self.enable_translation is True:
+            result = await asyncio.ensure_future(
+                asyncio.get_running_loop().run_in_executor(
+                    self.executor,
+                    lambda text: BergamotTranslator.translate(text),
+                    self.last_text,
+                ),
+            )
+        else:
+            result = self.last_text
 
         self.last_text = text
-
-        result = await translation_task
 
         # 如果句子太长，则截断显示在界面上
         if len(result) > 50:
