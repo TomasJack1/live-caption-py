@@ -23,7 +23,7 @@
 ### 3️⃣ 启动应用
 从[Release](https://github.com/TomasJack1/live-caption-py/releases)下载应用
 
-在`C:\Users\{这里是你的用户名}\AppData\Roaming\jiek`目录下的`livecaption.ini`配置文件中  如果没有则创建目录和文件 按如下格式配置
+在`C:\Users\{这里是你的用户名}\AppData\Roaming\jiek`目录下的`live-caption-py.ini`配置文件中  如果没有则创建目录和文件 按如下格式配置
 
 ```ini
 [General]
