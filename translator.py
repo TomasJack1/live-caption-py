@@ -5,7 +5,6 @@ from settings import get_settings
 
 
 class BergamotTranslator:
-    client = httpx.Client()
     settings = get_settings()
 
     @classmethod
@@ -22,14 +21,15 @@ class BergamotTranslator:
         """
         server_ip = cls.settings.value("server_ip")
         server_port = cls.settings.value("server_port")
-        response = cls.client.post(
-            url=f"http://{server_ip}:{server_port}/translate",
-            json={
-                "text": text,
-            },
-        )
+        with httpx.Client() as client:
+            response = client.post(
+                url=f"http://{server_ip}:{server_port}/translate",
+                json={
+                    "text": text,
+                },
+            )
 
-        return response.json().get("result")
+            return response.json().get("result")
 
 
 class DeeplTranslator:

@@ -173,6 +173,7 @@ class LiveCaptionManagerThread(QThread):
         super().__init__()
 
         self.start_live_caption()
+
         self.live_caption_window = auto.WindowControl(searchDepth=1, ClassName="LiveCaptionsDesktopWindow")
         self.hwnd = self.live_caption_window.NativeWindowHandle
         self.style_ex = win32gui.GetWindowLong(self.hwnd, win32con.GWL_EXSTYLE)
@@ -192,13 +193,15 @@ class LiveCaptionManagerThread(QThread):
         # 线程退出标志
         self.stop_event = threading.Event()
 
-        for wnd in self.live_caption_window.GetChildren():
-            if wnd.ClassName == "Windows.UI.Composition.DesktopWindowContentBridge":
-                self.live_caption_text_control = wnd.GetFirstChildControl().TextControl()
-
     @property
     def text(self) -> str:
         """获取LiveCaptions.exe 字幕"""
+        if self.live_caption_text_control is None or self.live_caption_text_control.Name == "":
+            for wnd in self.live_caption_window.GetChildren():
+                if wnd.ClassName == "Windows.UI.Composition.DesktopWindowContentBridge":
+                    self.live_caption_text_control = wnd.GetFirstChildControl().TextControl()
+                    break
+
         return self.live_caption_text_control.Name
 
     def stop(self) -> None:
