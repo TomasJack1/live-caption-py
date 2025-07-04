@@ -106,23 +106,25 @@ class SubtitleMainWindow(QWidget, Ui_Form):
             return
 
         if text.startswith(self.last_text) and len(self.last_text) > self.interval * self.count:
-            self.count *= 2
+            self.count += 1
 
         if not text.startswith(self.last_text):
             self.count = 1
 
         if self.enable_translation is True:
-            result = await asyncio.ensure_future(
-                asyncio.get_running_loop().run_in_executor(
+            loop = asyncio.get_running_loop()
+            translation_task = asyncio.ensure_future(
+                loop.run_in_executor(
                     self.executor,
                     lambda text: BergamotTranslator.translate(text, self.live_caption_manager_thread.get_current_language()),
                     self.last_text,
                 ),
             )
+            self.last_text = text
+            result = await translation_task
         else:
             result = self.last_text
-
-        self.last_text = text
+            self.last_text = text
 
         # 如果句子太长，则截断显示在界面上
         if len(result) > 50:
